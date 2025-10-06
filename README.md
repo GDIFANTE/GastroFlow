@@ -1,5 +1,8 @@
 GastroFlow
-Este é um projeto Next.js iniciado com create-next-app.
+
+Aplicativo desenvolvido para trabalho de WEBADS afim de realizar conexões práticas com o BDD mongoDB. Aplicativo focado na gestão de restaurantes.
+
+Este é um projeto Next.js
 
 Como Começar
 Primeiro, para rodar o servidor de desenvolvimento, execute um dos comandos abaixo no seu terminal:
@@ -17,18 +20,19 @@ Abra http://localhost:3000 no seu navegador para ver o resultado.
 
 Você pode começar a editar a página modificando o arquivo app/page.tsx. A página será atualizada automaticamente conforme você edita o arquivo.
 
-Este projeto usa next/font para otimizar e carregar automaticamente a Geist, uma nova família de fontes da Vercel.
-
-Saiba Mais
-Para aprender mais sobre Next.js, dê uma olhada nos seguintes recursos:
-
-Documentação do Next.js - aprenda sobre os recursos e a API do Next.js.
-
-Aprenda Next.js - um tutorial interativo de Next.js.
-
-Você pode conferir o repositório do Next.js no GitHub - feedbacks e contribuições são bem-vindos!
-
-Deploy na Vercel
-A maneira mais fácil de fazer o deploy do seu aplicativo Next.js é usando a Plataforma Vercel dos criadores do Next.js.
-
-Confira nossa documentação de deploy do Next.js para mais detalhes.
+Versões:
+  "dependencies":
+    "next": "15.5.4",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  
+  "devDependencies":
+    "@biomejs/biome": "2.2.0",
+    "@tailwindcss/postcss": "^4.1.14",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.14",
+    "typescript": "^5"

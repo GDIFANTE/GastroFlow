@@ -14,17 +14,12 @@
     "jsx": "preserve",
     "incremental": true,
 
-    // ================== A CORREÇÃO DEFINITIVA ==================
-    // A base para os atalhos agora é a pasta 'src/app',
-    // pois é DENTRO dela que estão suas pastas 'components' e 'mocks'.
-    "baseUrl": "src/app",
-    
+    "baseUrl": ".",
     "paths": {
-      // Este atalho agora vai funcionar corretamente.
-      // Ex: "@/components" será resolvido para "src/app/components".
-      "@/*": ["./*"]
+      "@/*": ["src/app/*"],
+      "@components/*": ["src/app/components/*"],
+      "@mocks/*": ["src/app/mocks/*"]
     },
-    // ==========================================================
 
     "plugins": [{ "name": "next" }]
   },
