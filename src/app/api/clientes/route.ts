@@ -3,14 +3,13 @@ import { getdb } from "@/lib/mongodb";
 
 export async function GET() {
   const db = await getdb();
-  const docs = await db.collection("pedidos").find().toArray();
+  const docs = await db.collection("clientes").find().toArray();
   return NextResponse.json(docs);
 }
 
-// insert
 export async function POST(req: Request) {
-  const body = await req.json(); // { cliente, pedido: [...], total, status }
+  const body = await req.json();
   const db = await getdb();
-  const r = await db.collection("pedidos").insertOne(body);
+  const r = await db.collection("clientes").insertOne(body);
   return NextResponse.json({ insertedId: r.insertedId });
 }

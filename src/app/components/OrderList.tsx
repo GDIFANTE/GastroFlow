@@ -1,5 +1,5 @@
 // src/components/OrderList.tsx
-import type { Order } from "@/mocks/data";
+import type { Order } from "@/app/mocks/data";
 
 export function OrderList({ orders }: { orders: Order[] }) {
   return (

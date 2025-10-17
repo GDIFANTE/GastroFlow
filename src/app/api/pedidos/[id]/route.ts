@@ -1,50 +1,40 @@
-// src/app/api/pedidos/[id]/route.ts
 import { NextResponse } from "next/server";
-import { getCollection } from "@/lib/mongodb";
+import { getdb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-type Params = { params: { id: string } };
-
-// PATCH = update parcial (ex.: { "status": "finalizado" })
-export async function PATCH(req: Request, { params }: Params) {
-  const body = await req.json();
-  const coll = await getCollection();
-
-  const r = await coll.updateOne(
-    { _id: new ObjectId(params.id) },
-    { $set: body }
-  );
-
-  return NextResponse.json({ matched: r.matchedCount, modified: r.modifiedCount });
-}
-
-// PUT = replace (substitui o documento inteiro)
-export async function PUT(req: Request, { params }: Params) {
-  const body = await req.json();
-  const coll = await getCollection();
-
-  // por segurança garante o mesmo _id
-  body._id = new ObjectId(params.id);
-
-  const r = await coll.replaceOne(
-    { _id: new ObjectId(params.id) },
-    body
-  );
-
-  return NextResponse.json({ matched: r.matchedCount, replaced: r.modifiedCount });
-}
-
-// GET = obter 1 documento
-export async function GET(_: Request, { params }: Params) {
-  const coll = await getCollection();
-  const doc = await coll.findOne({ _id: new ObjectId(params.id) });
+export async function GET(_: Request, { params }: { params: { id: string } }) {
+  const db = await getdb();
+  const doc = await db.collection("pedidos").findOne({ _id: new ObjectId(params.id) });
   if (!doc) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
   return NextResponse.json(doc);
 }
 
-// DELETE = remoção
-export async function DELETE(_: Request, { params }: Params) {
-  const coll = await getCollection();
-  const r = await coll.deleteOne({ _id: new ObjectId(params.id) });
+// atualização parcial
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+  const body = await req.json();
+  const db = await getdb();
+  const r = await db.collection("pedidos").updateOne(
+    { _id: new ObjectId(params.id) },
+    { $set: body }
+  );
+  return NextResponse.json({ matched: r.matchedCount, modified: r.modifiedCount });
+}
+
+// replace (troca o documento inteiro)
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  const body = await req.json();
+  const db = await getdb();
+  // garante que não mantém o _id no body
+  delete (body as any)._id;
+  const r = await db.collection("pedidos").replaceOne(
+    { _id: new ObjectId(params.id) },
+    body
+  );
+  return NextResponse.json({ matched: r.matchedCount, replaced: r.modifiedCount });
+}
+
+export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+  const db = await getdb();
+  const r = await db.collection("pedidos").deleteOne({ _id: new ObjectId(params.id) });
   return NextResponse.json({ deleted: r.deletedCount });
 }

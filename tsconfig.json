@@ -16,9 +16,7 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/app/*"],
-      "@components/*": ["src/app/components/*"],
-      "@mocks/*": ["src/app/mocks/*"]
+      "@/*": ["src/*"]
     },
 
     "plugins": [{ "name": "next" }]
