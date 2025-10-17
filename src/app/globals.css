@@ -4,14 +4,14 @@
 
 /* Variáveis globais */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0b0b;
+  --foreground: #f2f2f2;
 }
 
 /* Tema escuro */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #ff6600;
     --foreground: #ededed;
   }
 }

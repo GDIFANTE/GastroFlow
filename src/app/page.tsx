@@ -12,10 +12,10 @@ export default function Home() {
   return (
     <main className="space-y-8 p-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
         <Link
           href="/pedidos"
-          className="px-4 py-2 rounded-lg bg-black text-white hover:opacity-90"
+          className="px-4 py-2 rounded-lg bg-white text-black hover:opacity-90"
         >
           Ver pedidos
         </Link>

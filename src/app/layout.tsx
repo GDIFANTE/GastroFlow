@@ -16,8 +16,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.className} bg-gray-50`}>
         <nav className="sticky top-0 z-10 bg-white border-b">
           <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
-            <Link href="/" className="font-semibold">GastroFlow</Link>
-            <div className="flex gap-4 text-sm">
+            <Link href="/" className="text-2xl font-semibold text-orange-500">GastroFlow</Link>
+            <div className="flex gap-4 text-sm text-black font-medium">
               <Link href="/cardapio">Cardápio</Link>
               <Link href="/pedidos">Pedidos</Link>
               <Link href="/clientes">Clientes</Link>
