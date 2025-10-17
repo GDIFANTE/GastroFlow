@@ -59,8 +59,8 @@ async function main() {
       {
         $setOnInsert: {
           nome,
-          preco: 0,           // ajuste depois
-          tipo: "Principal",  // ajuste depois
+          preco: 0,           
+          tipo: "Principal",  
         },
       },
       { upsert: true, returnDocument: "after" }
@@ -96,10 +96,10 @@ async function main() {
     await pedidosCol.insertOne({
       cliente: p.cliente,
       clienteId,
-      items,             // estruturado
-      total: p.total,    // você pode recalcular com base em items se quiser
+      items,             
+      total: p.total,   
       status: p.status,
-      data: new Date(),  // ou derive do seu JSON se houver
+      data: new Date(),  
     });
   }
 
