@@ -9,35 +9,44 @@ type RelatorioItem = {
   qtdPedidos: number;
 };
 
+type Cliente = {
+  _id: string;
+  nome: string;
+  telefone?: string;
+  email?: string;
+};
+
 export default function RelatoriosPage() {
   const [dados, setDados] = useState<RelatorioItem[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clienteSelecionado, setClienteSelecionado] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
-  const [clientes, setClientes] = useState<string[]>([]);
-  const [clienteSelecionado, setClienteSelecionado] = useState("");
 
-  // 🔹 Carrega nomes de clientes ao iniciar
+  // 🔹 Carrega lista de clientes cadastrados
   useEffect(() => {
     async function fetchClientes() {
       try {
         const res = await fetch("/api/clientes");
         if (!res.ok) throw new Error("Erro ao buscar clientes");
         const data = await res.json();
-        setClientes(data);
-      } catch {
+        setClientes(data); // data é [{ _id, nome }]
+      } catch (e) {
+        console.error(e);
         setErro("Erro ao carregar lista de clientes.");
       }
     }
     fetchClientes();
   }, []);
 
-  // 🔹 Carrega relatório completo ou filtrado
+  // 🔹 Carrega relatório (todos ou por cliente)
   async function carregar() {
     setCarregando(true);
     setErro("");
     try {
       let url = "/api/relatorios";
-      if (clienteSelecionado) url += `?cliente=${encodeURIComponent(clienteSelecionado)}`;
+      if (clienteSelecionado)
+        url += `?cliente=${encodeURIComponent(clienteSelecionado)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Erro ao buscar relatório");
       const data = await res.json();
@@ -56,6 +65,7 @@ export default function RelatoriosPage() {
         Relatório – Total por Cliente
       </h1>
 
+      {/* 🔹 Filtros */}
       <div className="flex gap-3 items-center">
         <label className="text-white font-medium">Cliente:</label>
         <select
@@ -65,8 +75,8 @@ export default function RelatoriosPage() {
         >
           <option value="">Todos</option>
           {clientes.map((c) => (
-            <option key={c} value={c}>
-              {c}
+            <option key={c._id} value={c.nome}>
+              {c.nome}
             </option>
           ))}
         </select>
@@ -86,6 +96,7 @@ export default function RelatoriosPage() {
 
       {erro && <p className="text-red-500">{erro}</p>}
 
+      {/* 🔹 Tabela */}
       <div className="rounded-xl border bg-white">
         <table className="w-full text-left border-collapse">
           <thead>

@@ -1,8 +1,9 @@
+// src/app/api/cardapio/route.ts
 import { getdb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
-// 🔹 GET – listar todos os itens do cardápio
+// 🔹 GET – lista os produtos do cardápio
 export async function GET() {
   try {
     const db = await getdb();
@@ -16,11 +17,14 @@ export async function GET() {
     return NextResponse.json(itens);
   } catch (e) {
     console.error("Erro no GET /api/cardapio:", e);
-    return NextResponse.json({ error: "Erro ao listar cardápio" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erro ao listar cardápio" },
+      { status: 500 }
+    );
   }
 }
 
-// 🔹 PATCH – atualizar vários itens do cardápio
+// 🔹 PATCH – atualiza produtos existentes (usado na tela de cardápio)
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
@@ -37,15 +41,15 @@ export async function PATCH(req: Request) {
       if (!item.id) continue;
       const { id, ...dados } = item;
 
-      await col.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: dados }
-      );
+      await col.updateOne({ _id: new ObjectId(id) }, { $set: dados });
     }
 
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("Erro no PATCH /api/cardapio:", e);
-    return NextResponse.json({ error: "Erro ao atualizar cardápio" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erro ao atualizar cardápio" },
+      { status: 500 }
+    );
   }
 }
