@@ -1,0 +1,17 @@
+[
+  { "cliente": "João Silva", "pedido": ["Pizza Margherita", "Refrigerante"], "total": 45.90, "status": "finalizado" },
+  { "cliente": "Maria Oliveira", "pedido": ["Lasanha", "Suco de Laranja"], "total": 38.50, "status": "em preparo" },
+  { "cliente": "Ana Souza", "pedido": ["Hambúrguer", "Batata Frita", "Milkshake"], "total": 55.00, "status": "entregue" },
+  { "cliente": "Pedro Lima", "pedido": ["Sushi", "Água"], "total": 72.00, "status": "finalizado" },
+  { "cliente": "Clara Mendes", "pedido": ["Salada Caesar", "Suco Verde"], "total": 32.90, "status": "em preparo" },
+  { "cliente": "Rafael Gomes", "pedido": ["Feijoada", "Cerveja"], "total": 60.00, "status": "entregue" },
+  { "cliente": "Juliana Rocha", "pedido": ["Pizza Quatro Queijos", "Refrigerante"], "total": 49.50, "status": "finalizado" },
+  { "cliente": "Carlos Santos", "pedido": ["Macarronada", "Vinho"], "total": 85.00, "status": "entregue" },
+  { "cliente": "Fernanda Costa", "pedido": ["Tacos", "Tequila"], "total": 70.00, "status": "em preparo" },
+  { "cliente": "André Martins", "pedido": ["Camarão Grelhado", "Suco de Abacaxi"], "total": 95.00, "status": "finalizado" },
+  { "cliente": "Paula Souza", "pedido": ["Sanduíche Natural", "Suco Detox"], "total": 28.00, "status": "em preparo" },
+  { "cliente": "Rodrigo Alves", "pedido": ["Strogonoff", "Coca-Cola"], "total": 58.00, "status": "entregue" },
+  { "cliente": "Marcos Silva", "pedido": ["Pizza Calabresa", "Suco de Uva"], "total": 48.00, "status": "em preparo" },
+  { "cliente": "Beatriz Ramos", "pedido": ["Risoto de Cogumelos", "Água com Gás"], "total": 65.00, "status": "finalizado" },
+  { "cliente": "Lucas Almeida", "pedido": ["Churrasco", "Cerveja Artesanal"], "total": 120.00, "status": "entregue" }
+]
