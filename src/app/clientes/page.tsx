@@ -8,10 +8,12 @@ type Cliente = {
   nome: string;
   telefone?: string;
   email?: string;
+  endereco?: string;
 };
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [selectedId, setSelectedId] = useState<string>(""); // 👈 controla o select
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(
     null
   );
@@ -25,7 +27,7 @@ export default function ClientesPage() {
       try {
         const res = await fetch("/api/clientes");
         if (!res.ok) throw new Error("Erro ao buscar clientes");
-        const data = await res.json();
+        const data = (await res.json()) as Cliente[];
         setClientes(data);
       } catch (e) {
         console.error(e);
@@ -35,8 +37,9 @@ export default function ClientesPage() {
     fetchClientes();
   }, []);
 
-  // 🔹 Quando selecionar um cliente, busca dados completos dele
+  // 🔹 Seleciona um cliente e busca dados completos
   async function handleSelecionarCliente(id: string) {
+    setSelectedId(id);
     if (!id) {
       setClienteSelecionado(null);
       return;
@@ -46,7 +49,7 @@ export default function ClientesPage() {
     try {
       const res = await fetch(`/api/clientes/${id}`);
       if (!res.ok) throw new Error("Erro ao buscar dados do cliente");
-      const data = await res.json();
+      const data = (await res.json()) as Cliente;
       setClienteSelecionado(data);
     } catch (e) {
       console.error(e);
@@ -59,19 +62,36 @@ export default function ClientesPage() {
   // 🔹 Atualiza o cliente no banco
   async function salvarAlteracoes() {
     if (!clienteSelecionado) return;
+
     setSalvando(true);
     setErro("");
     try {
+      // 👇 nunca envie _id no corpo do PATCH
+      const { _id, ...update } = clienteSelecionado;
+
       const res = await fetch(`/api/clientes/${clienteSelecionado._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(clienteSelecionado),
+        body: JSON.stringify(update),
       });
-      if (!res.ok) throw new Error("Erro ao salvar alterações");
+
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: "" }));
+        throw new Error(error || "Erro ao salvar alterações");
+      }
+
+      // ✅ atualiza lista em memória
+      setClientes((prev) =>
+        prev.map((c) =>
+          c._id === clienteSelecionado._id ? { ...c, ...update } : c
+        )
+      );
+
       alert("Alterações salvas com sucesso!");
     } catch (e) {
       console.error(e);
       setErro("Erro ao salvar alterações.");
+      alert("Erro ao salvar alterações.");
     } finally {
       setSalvando(false);
     }
@@ -86,8 +106,8 @@ export default function ClientesPage() {
         <label className="text-white font-medium">Cliente:</label>
         <select
           className="border rounded px-3 py-2 text-black"
+          value={selectedId}
           onChange={(e) => handleSelecionarCliente(e.target.value)}
-          defaultValue=""
         >
           <option value="">Selecione um cliente...</option>
           {clientes.map((c) => (
@@ -143,6 +163,22 @@ export default function ClientesPage() {
                 setClienteSelecionado({
                   ...clienteSelecionado,
                   email: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          {/* (Opcional) Endereço, se existir na sua coleção */}
+          <div>
+            <label className="block text-gray-700 font-medium">Endereço:</label>
+            <input
+              type="text"
+              className="w-full border rounded px-3 py-2 text-black"
+              value={clienteSelecionado.endereco ?? ""}
+              onChange={(e) =>
+                setClienteSelecionado({
+                  ...clienteSelecionado,
+                  endereco: e.target.value,
                 })
               }
             />

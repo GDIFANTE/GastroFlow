@@ -2,28 +2,40 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function NovoProduto() {
+  const router = useRouter();
+
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState("principal");
-  const [preco, setPreco] = useState(0);
+  const [preco, setPreco] = useState<number | string>("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    if (!nome.trim() || preco === "" || isNaN(Number(preco))) {
+      alert("Preencha todos os campos corretamente!");
+      return;
+    }
+
     const res = await fetch("/api/produtos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome, tipo, preco }),
+      body: JSON.stringify({
+        nome,
+        tipo,
+        preco: parseFloat(preco as string),
+      }),
     });
 
     if (res.ok) {
       alert("Produto cadastrado com sucesso!");
-      setNome("");
-      setTipo("principal");
-      setPreco(0);
+      // Redireciona para o cardápio após salvar
+      router.push("/cardapio");
     } else {
-      alert("Erro ao salvar produto!");
+      const msg = await res.text().catch(() => "");
+      alert("Erro ao salvar produto! " + msg);
     }
   }
 
@@ -32,6 +44,7 @@ export default function NovoProduto() {
       <h1 className="text-2xl font-semibold text-white mb-4">Novo Produto</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-w-md">
+        {/* Nome */}
         <label className="text-white font-medium">
           Nome do produto:
           <input
@@ -43,6 +56,7 @@ export default function NovoProduto() {
           />
         </label>
 
+        {/* Tipo */}
         <label className="text-white font-medium">
           Categoria / Tipo:
           <select
@@ -58,12 +72,16 @@ export default function NovoProduto() {
           </select>
         </label>
 
+        {/* Preço */}
         <label className="text-white font-medium">
           Preço (R$):
           <input
             type="number"
             value={preco}
-            onChange={(e) => setPreco(parseFloat(e.target.value))}
+            onChange={(e) => {
+              const valor = e.target.value;
+              setPreco(valor === "" ? "" : parseFloat(valor));
+            }}
             className="w-full p-2 rounded border text-black"
             min="0"
             step="0.01"
@@ -71,6 +89,7 @@ export default function NovoProduto() {
           />
         </label>
 
+        {/* Botão */}
         <button
           type="submit"
           className="mt-4 px-4 py-2 rounded bg-black text-white hover:opacity-80"

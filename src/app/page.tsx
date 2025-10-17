@@ -13,10 +13,10 @@ type PedidoDoc = {
   _id: ObjectId;
   id?: number; // opcional: alguns docs podem ter esse campo
   cliente: string;
-  pedido?: string[];
+  pedido?: string[]; // não usamos aqui
   total: number;
-  status: "em preparo" | "finalizado" | "entregue";
-  data?: Date;
+  status: "em preparo" | "finalizado" | "entregue" | "pronto";
+  data?: Date | string; // pode vir string
 };
 
 // Documento de itens do cardápio
@@ -29,8 +29,14 @@ type CardapioItem = {
 };
 
 // Hora amigável (usa campo data ou timestamp do _id)
-function docToTime(doc: { _id: ObjectId; data?: Date }) {
-  const d = doc.data ?? doc._id.getTimestamp();
+function docToTime(doc: { _id: ObjectId; data?: Date | string }) {
+  const d =
+    doc.data instanceof Date
+      ? doc.data
+      : typeof doc.data === "string"
+      ? new Date(doc.data)
+      : doc._id.getTimestamp();
+
   return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
@@ -42,14 +48,18 @@ function shortNumericId(oid: ObjectId) {
 export default async function Home() {
   const db = await getdb();
 
-  const pedidosCol = db.collection<PedidoDoc>("restaurante");
+  // ✅ coleções corretas
+  const pedidosCol = db.collection<PedidoDoc>("pedidos");
   const cardapioCol = db.collection<CardapioItem>("cardapio");
 
-  // -------- Pedidos recentes (3 últimos) --------
+  // -------- Pedidos recentes (10 últimos, apenas ativos) --------
   const recentOrders = await pedidosCol
-    .find({}, { projection: { _id: 1, id: 1, cliente: 1, total: 1, status: 1, data: 1 } })
-    .sort({ _id: -1 })
-    .limit(3)
+    .find(
+      { status: { $in: ["em preparo", "pronto"] } }, // apenas esses status
+      { projection: { _id: 1, id: 1, cliente: 1, total: 1, status: 1, data: 1 } }
+    )
+    .sort({ data: -1, _id: -1 })
+    .limit(10)
     .toArray();
 
   const orders = recentOrders.map((o) => ({
@@ -114,7 +124,9 @@ export default async function Home() {
     .toArray();
 
   const faturamentoHoje = faturamentoHojeAgg[0]?.total ?? 0;
-  const pedidosEmAndamento = await pedidosCol.countDocuments({ status: { $ne: "entregue" } });
+  const pedidosEmAndamento = await pedidosCol.countDocuments({
+    status: { $ne: "entregue" },
+  });
   const itensNoCardapio = await cardapioCol.countDocuments().catch(() => 0);
   const clientesDistinct = (await pedidosCol.distinct("cliente")).length;
 
@@ -138,7 +150,7 @@ export default async function Home() {
       <Stats stats={stats} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Lista de Pedidos do banco */}
+        {/* Lista de Pedidos do banco (10 últimos) */}
         <section className="lg:col-span-2">
           <OrderList orders={orders} />
         </section>

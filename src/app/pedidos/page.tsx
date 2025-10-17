@@ -1,97 +1,242 @@
-import { ObjectId } from "mongodb";
-import { getdb } from "@/lib/mongodb";
-import FilterBar from "./FilterBar";
-import { OrderList } from "@/app/components/OrderList";
+// src/app/pedidos/page.tsx
+"use client";
 
-type PedidoDoc = {
-  _id: ObjectId;
+import { useEffect, useMemo, useState } from "react";
+
+type Pedido = {
+  _id: string;
   cliente: string;
   total: number;
-  status: string;
+  status: "em preparo" | "pronto" | "entregue" | string;
+  data?: string; // virá como ISO no JSON
+  numero?: number;
 };
 
-function idToTime(oid: ObjectId): string {
-  const d = oid.getTimestamp();
-  return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+type Cliente = { _id: string; nome: string };
+
+function formatData(d?: string) {
+  if (!d) return "-";
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return "-";
+  return dt.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function normalizeStatusForUI(s: string): "Em preparo" | "Pronto" | "Entregue" {
-  if (s === "em preparo") return "Em preparo";
-  if (s === "entregue") return "Entregue";
-  return "Pronto"; // “pronto” e “finalizado”
-}
+export default function PedidosPage() {
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [statusFiltro, setStatusFiltro] = useState<string>("");
+  const [clienteFiltro, setClienteFiltro] = useState<string>("");
+  const [carregando, setCarregando] = useState(false);
+  const [excluindoId, setExcluindoId] = useState<string>("");
+  const [erro, setErro] = useState("");
 
-export default async function PedidosPage({
-  searchParams,
-}: {
-  searchParams: { cliente?: string; status?: string };
-}) {
-  const db = await getdb();
-  const col = db.collection<PedidoDoc>("restaurante");
+  // Carrega clientes (dropdown) e pedidos
+  useEffect(() => {
+    async function init() {
+      try {
+        setCarregando(true);
+        setErro("");
 
-  // --- Opções de filtro vindas do banco ---
-  const clientes = (await col.distinct("cliente"))
-    .filter((c): c is string => typeof c === "string")
-    .sort((a, b) => a.localeCompare(b, "pt-BR"));
+        const [resClientes, resPedidos] = await Promise.all([
+          fetch("/api/clientes").then((r) => (r.ok ? r.json() : [])),
+          fetch("/api/pedidos").then((r) => (r.ok ? r.json() : [])),
+        ]);
 
-  // status distintos (pode vir “finalizado”)
-  const rawStatuses = (await col.distinct("status")).filter(
-    (s): s is string => typeof s === "string"
+        setClientes(resClientes);
+        setPedidos(resPedidos);
+      } catch (e) {
+        console.error(e);
+        setErro("Erro ao carregar dados.");
+      } finally {
+        setCarregando(false);
+      }
+    }
+    init();
+  }, []);
+
+  // Opções de clientes para o select (ordena por nome)
+  const nomesClientes = useMemo(
+    () =>
+      (clientes as Cliente[])
+        .map((c) => ({ id: c._id, nome: c.nome }))
+        .sort((a, b) => a.nome.localeCompare(b.nome)),
+    [clientes]
   );
-  // opções que exibiremos
-  const statusOptions: Array<{ value: string; label: string }> = [
-    { value: "", label: "Todos" },
-    { value: "em preparo", label: "Em preparo" },
-    { value: "pronto", label: "Pronto/Finalizado" }, // 'pronto' cobre 'finalizado'
-    { value: "entregue", label: "Entregue" },
-  ].filter((opt) =>
-    opt.value === ""
-      ? true
-      : opt.value === "pronto"
-      ? rawStatuses.some((s) => s === "pronto" || s === "finalizado")
-      : rawStatuses.includes(opt.value)
-  );
 
-  // --- Monta filtro da consulta ---
-  const query: any = {};
-  if (searchParams.cliente?.trim()) {
-    query.cliente = searchParams.cliente.trim(); // seleção exata via <select>
-  }
-  if (searchParams.status) {
-    if (searchParams.status === "pronto") {
-      query.status = { $in: ["pronto", "finalizado"] };
-    } else {
-      query.status = searchParams.status;
+  // Filtro em memória
+  const filtrados = useMemo(() => {
+    return pedidos.filter((p) => {
+      const okStatus = statusFiltro ? p.status === statusFiltro : true;
+      const okCliente = clienteFiltro ? p.cliente === clienteFiltro : true;
+      return okStatus && okCliente;
+    });
+  }, [pedidos, statusFiltro, clienteFiltro]);
+
+  async function recarregar() {
+    try {
+      setCarregando(true);
+      setErro("");
+      const data = await fetch("/api/pedidos").then((r) => (r.ok ? r.json() : []));
+      setPedidos(data);
+    } catch (e) {
+      console.error(e);
+      setErro("Erro ao recarregar pedidos.");
+    } finally {
+      setCarregando(false);
     }
   }
 
-  const docs = await col
-    .find(query, { projection: { cliente: 1, total: 1, status: 1 } })
-    .sort({ _id: -1 })
-    .toArray();
+  function limparFiltros() {
+    setStatusFiltro("");
+    setClienteFiltro("");
+  }
 
-  const orders = docs.map((o) => ({
-    id: o._id.toString(),
-    cliente: o.cliente,
-    hora: idToTime(o._id),
-    total: o.total,
-    status: normalizeStatusForUI(o.status),
-  }));
+  // 🔥 Excluir pedido
+  async function excluirPedido(id: string) {
+    const ok = confirm("Tem certeza que deseja excluir este pedido?");
+    if (!ok) return;
+
+    try {
+      setExcluindoId(id);
+      const res = await fetch(`/api/pedidos/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        throw new Error(t || "Falha ao excluir");
+      }
+      // remove da lista local
+      setPedidos((prev) => prev.filter((p) => p._id !== id));
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao excluir pedido.");
+    } finally {
+      setExcluindoId("");
+    }
+  }
 
   return (
-    <main className="space-y-6 p-6">
-      <h1 className="text-2xl font-semibold text-white">Pedidos</h1>
+    <main className="p-6 text-black">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">Pedidos</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={recarregar}
+            className="px-4 py-2 rounded border bg-white hover:opacity-90"
+            disabled={carregando}
+          >
+            {carregando ? "Carregando..." : "Recarregar"}
+          </button>
+          <button
+            onClick={limparFiltros}
+            className="px-4 py-2 rounded border bg-white hover:opacity-90"
+          >
+            Limpar filtros
+          </button>
+        </div>
+      </div>
 
-      <FilterBar
-        clientes={clientes}
-        statuses={statusOptions}
-        initialCliente={searchParams.cliente ?? ""}
-        initialStatus={searchParams.status ?? ""}
-      />
+      {/* Filtros */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <div>
+          <label className="font-medium block mb-1">Status:</label>
+          <select
+            value={statusFiltro}
+            onChange={(e) => setStatusFiltro(e.target.value)}
+            className="border rounded px-3 py-2 bg-white text-black"
+          >
+            <option value="">Todos</option>
+            <option value="em preparo">Em preparo</option>
+            <option value="pronto">Pronto</option>
+            <option value="entregue">Entregue</option>
+          </select>
+        </div>
 
-      <section className="lg:col-span-2">
-        <OrderList orders={orders} />
-      </section>
+        <div>
+          <label className="font-medium block mb-1">Cliente:</label>
+          <select
+            value={clienteFiltro}
+            onChange={(e) => setClienteFiltro(e.target.value)}
+            className="border rounded px-3 py-2 bg-white text-black min-w-56"
+          >
+            <option value="">Todos</option>
+            {nomesClientes.map((c) => (
+              <option key={c.id} value={c.nome}>
+                {c.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Tabela */}
+      <div className="overflow-x-auto bg-white rounded-xl border">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-2 border-b">Cliente</th>
+              <th className="px-4 py-2 border-b">Total (R$)</th>
+              <th className="px-4 py-2 border-b">Status</th>
+              <th className="px-4 py-2 border-b">Data</th>
+              <th className="px-4 py-2 border-b w-36">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtrados.map((p) => (
+              <tr key={p._id} className="hover:bg-gray-50">
+                <td className="px-4 py-2 border-b">{p.cliente}</td>
+                <td className="px-4 py-2 border-b">
+                  {Number(p.total || 0).toFixed(2)}
+                </td>
+                <td className="px-4 py-2 border-b capitalize">{p.status}</td>
+                <td className="px-4 py-2 border-b">{formatData(p.data)}</td>
+                <td className="px-4 py-2 border-b">
+                  <button
+                    onClick={() => excluirPedido(p._id)}
+                    disabled={excluindoId === p._id}
+                    className={`px-3 py-2 rounded border ${
+                      excluindoId === p._id
+                        ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                        : "bg-white text-black hover:opacity-90"
+                    }`}
+                    title="Excluir pedido"
+                  >
+                    {excluindoId === p._id ? "Excluindo..." : "Excluir"}
+                  </button>
+                </td>
+              </tr>
+            ))}
+
+            {filtrados.length === 0 && (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="text-center text-gray-500 py-4 border-b"
+                >
+                  Nenhum pedido encontrado.
+                </td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot>
+            <tr className="bg-gray-100 font-semibold">
+              <td className="px-4 py-2 border-t">Total filtrado</td>
+              <td className="px-4 py-2 border-t">
+                R${" "}
+                {filtrados
+                  .reduce((sum, p) => sum + Number(p.total || 0), 0)
+                  .toFixed(2)}
+              </td>
+              <td className="border-t"></td>
+              <td className="border-t"></td>
+              <td className="border-t"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
     </main>
   );
 }
