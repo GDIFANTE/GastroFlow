@@ -1,16 +1,25 @@
 // src/app/api/clientes/route.ts
-import { NextResponse } from "next/server";
 import { getdb } from "@/lib/mongodb";
+import { NextResponse } from "next/server";
 
 export async function GET() {
-  const db = await getdb();
-  const docs = await db
-    .collection("clientes")
-    .find({}, { projection: { nome: 1 } })
-    .sort({ nome: 1 })
-    .toArray();
+  try {
+    const db = await getdb();
+    const clientes = db.collection("clientes");
 
-  return NextResponse.json(
-    docs.map((d) => ({ _id: String(d._id), nome: d.nome })),
-  );
+    const lista = await clientes
+      .find({}, { projection: { nome: 1 } })
+      .sort({ nome: 1 })
+      .toArray();
+
+    // 🔹 Retorna apenas nomes simples (para relatórios)
+    const nomes = lista
+      .map((c) => c.nome)
+      .filter((n) => typeof n === "string");
+
+    return NextResponse.json(nomes);
+  } catch (e) {
+    console.error("Erro ao buscar clientes:", e);
+    return NextResponse.json({ error: "Erro ao buscar clientes" }, { status: 500 });
+  }
 }

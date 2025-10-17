@@ -1,36 +1,125 @@
+// src/app/relatorios/page.tsx
 "use client";
-import { useEffect, useState } from "react";
 
-type Row = { _id: string; totalGasto: number; pedidos: number };
+import { useState, useEffect } from "react";
 
-export default function Relatorios() {
-  const [data, setData] = useState<Row[]>([]);
+type RelatorioItem = {
+  _id: string;
+  totalGasto: number;
+  qtdPedidos: number;
+};
 
+export default function RelatoriosPage() {
+  const [dados, setDados] = useState<RelatorioItem[]>([]);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
+  const [clientes, setClientes] = useState<string[]>([]);
+  const [clienteSelecionado, setClienteSelecionado] = useState("");
+
+  // 🔹 Carrega nomes de clientes ao iniciar
+  useEffect(() => {
+    async function fetchClientes() {
+      try {
+        const res = await fetch("/api/clientes");
+        if (!res.ok) throw new Error("Erro ao buscar clientes");
+        const data = await res.json();
+        setClientes(data);
+      } catch {
+        setErro("Erro ao carregar lista de clientes.");
+      }
+    }
+    fetchClientes();
+  }, []);
+
+  // 🔹 Carrega relatório completo ou filtrado
   async function carregar() {
-    const r = await fetch("/api/relatorios/total-por-cliente");
-    const j = await r.json();
-    setData(j);
+    setCarregando(true);
+    setErro("");
+    try {
+      let url = "/api/relatorios";
+      if (clienteSelecionado) url += `?cliente=${encodeURIComponent(clienteSelecionado)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Erro ao buscar relatório");
+      const data = await res.json();
+      setDados(data);
+    } catch (e) {
+      console.error(e);
+      setErro("Erro ao carregar dados.");
+    } finally {
+      setCarregando(false);
+    }
   }
 
-  useEffect(() => { carregar(); }, []);
-
   return (
-    <main className="space-y-4">
-      <h1 className="text-2xl font-semibold">Relatório – Total por Cliente</h1>
-      <button className="px-4 py-2 rounded border" onClick={carregar}>Recarregar</button>
+    <main className="p-6 space-y-6">
+      <h1 className="text-2xl font-semibold text-white">
+        Relatório – Total por Cliente
+      </h1>
 
-      <div className="rounded border bg-white mt-4">
-        <div className="grid grid-cols-3 font-medium p-3 border-b">
-          <div>Cliente</div><div>Total Gasto (R$)</div><div>Pedidos</div>
-        </div>
-        {data.map((r) => (
-          <div key={r._id} className="grid grid-cols-3 p-3 border-b">
-            <div>{r._id}</div>
-            <div>{r.totalGasto.toFixed(2)}</div>
-            <div>{r.pedidos}</div>
-          </div>
-        ))}
-        {data.length === 0 && <div className="p-3 text-sm text-gray-500">Sem dados</div>}
+      <div className="flex gap-3 items-center">
+        <label className="text-white font-medium">Cliente:</label>
+        <select
+          value={clienteSelecionado}
+          onChange={(e) => setClienteSelecionado(e.target.value)}
+          className="border rounded px-3 py-2 text-black"
+        >
+          <option value="">Todos</option>
+          {clientes.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+
+        <button
+          onClick={carregar}
+          disabled={carregando}
+          className={`px-4 py-2 rounded text-white font-semibold ${
+            carregando
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
+        >
+          {carregando ? "Carregando..." : "Recarregar"}
+        </button>
+      </div>
+
+      {erro && <p className="text-red-500">{erro}</p>}
+
+      <div className="rounded-xl border bg-white">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-3 border-b">Cliente</th>
+              <th className="p-3 border-b">Total Gasto (R$)</th>
+              <th className="p-3 border-b">Pedidos</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dados.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="text-center p-4 text-gray-500 italic"
+                >
+                  Sem dados
+                </td>
+              </tr>
+            ) : (
+              dados.map((item) => (
+                <tr key={item._id}>
+                  <td className="p-3 border-b text-black">{item._id}</td>
+                  <td className="p-3 border-b text-black">
+                    {item.totalGasto.toFixed(2)}
+                  </td>
+                  <td className="p-3 border-b text-black">
+                    {item.qtdPedidos}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </main>
   );

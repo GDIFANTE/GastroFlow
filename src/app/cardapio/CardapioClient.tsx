@@ -1,7 +1,7 @@
 // src/app/cardapio/CardapioClient.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState, useMemo } from "react";
 
 type Item = {
   id: string;
@@ -18,6 +18,10 @@ export default function CardapioClient({
   items: Item[];
   tiposBanco: string[];
 }) {
+  const [data, setData] = useState<Item[]>(items);
+  const [filtroTipo, setFiltroTipo] = useState("todos");
+  const [salvando, setSalvando] = useState(false);
+
   const tipos = useMemo(
     () =>
       Array.from(
@@ -26,10 +30,7 @@ export default function CardapioClient({
     [tiposBanco]
   );
 
-  const [filtroTipo, setFiltroTipo] = useState<string>("todos");
-  const [data, setData] = useState<Item[]>(items);
-
-  const mostrados = useMemo(
+  const filtrados = useMemo(
     () =>
       filtroTipo === "todos"
         ? data
@@ -39,17 +40,30 @@ export default function CardapioClient({
     [data, filtroTipo]
   );
 
-  async function salvar(id: string, patch: Partial<Item>) {
-    const res = await fetch(`/api/produtos/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patch),
-    });
-    if (!res.ok) {
-      alert("Erro ao salvar");
-      return;
+  const atualizarCampo = (id: string, campo: keyof Item, valor: string | number) => {
+    setData((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, [campo]: valor } : item
+      )
+    );
+  };
+
+  async function salvarAlteracoes() {
+    setSalvando(true);
+    try {
+      const res = await fetch("/api/cardapio", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Erro ao salvar");
+      alert("Alterações salvas com sucesso!");
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao salvar alterações.");
+    } finally {
+      setSalvando(false);
     }
-    setData((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
   }
 
   return (
@@ -71,6 +85,18 @@ export default function CardapioClient({
               </option>
             ))}
           </select>
+
+          <button
+            onClick={salvarAlteracoes}
+            disabled={salvando}
+            className={`px-4 py-2 rounded text-white font-semibold ${
+              salvando
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
+            }`}
+          >
+            {salvando ? "Salvando..." : "Salvar alterações"}
+          </button>
         </div>
       </header>
 
@@ -80,7 +106,7 @@ export default function CardapioClient({
         </div>
 
         <ul className="divide-y">
-          {mostrados.map((item) => (
+          {filtrados.map((item) => (
             <li key={item.id} className="p-4 flex items-center gap-4">
               <div className="flex-1">
                 <div className="font-medium text-black">{item.nome}</div>
@@ -94,7 +120,7 @@ export default function CardapioClient({
                   className="border rounded px-2 py-1 text-black"
                   value={item.tipo ?? ""}
                   onChange={(e) =>
-                    salvar(item.id, { tipo: e.target.value || undefined })
+                    atualizarCampo(item.id, "tipo", e.target.value)
                   }
                 >
                   <option value="">—</option>
@@ -113,9 +139,9 @@ export default function CardapioClient({
                   type="number"
                   step="0.01"
                   className="w-28 border rounded px-2 py-1 text-right text-black placeholder-gray-500"
-                  defaultValue={item.preco}
-                  onBlur={(e) =>
-                    salvar(item.id, { preco: Number(e.target.value || 0) })
+                  value={item.preco}
+                  onChange={(e) =>
+                    atualizarCampo(item.id, "preco", Number(e.target.value))
                   }
                 />
               </div>
