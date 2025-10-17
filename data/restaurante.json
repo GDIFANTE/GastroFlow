@@ -1,17 +1,153 @@
 [
-  { "cliente": "Jo„o Silva", "pedido": ["Pizza Margherita", "Refrigerante"], "total": 45.90, "status": "finalizado" },
-  { "cliente": "Maria Oliveira", "pedido": ["Lasanha", "Suco de Laranja"], "total": 38.50, "status": "em preparo" },
-  { "cliente": "Ana Souza", "pedido": ["Hamb˙rguer", "Batata Frita", "Milkshake"], "total": 55.00, "status": "entregue" },
-  { "cliente": "Pedro Lima", "pedido": ["Sushi", "¡gua"], "total": 72.00, "status": "finalizado" },
-  { "cliente": "Clara Mendes", "pedido": ["Salada Caesar", "Suco Verde"], "total": 32.90, "status": "em preparo" },
-  { "cliente": "Rafael Gomes", "pedido": ["Feijoada", "Cerveja"], "total": 60.00, "status": "entregue" },
-  { "cliente": "Juliana Rocha", "pedido": ["Pizza Quatro Queijos", "Refrigerante"], "total": 49.50, "status": "finalizado" },
-  { "cliente": "Carlos Santos", "pedido": ["Macarronada", "Vinho"], "total": 85.00, "status": "entregue" },
-  { "cliente": "Fernanda Costa", "pedido": ["Tacos", "Tequila"], "total": 70.00, "status": "em preparo" },
-  { "cliente": "AndrÈ Martins", "pedido": ["Camar„o Grelhado", "Suco de Abacaxi"], "total": 95.00, "status": "finalizado" },
-  { "cliente": "Paula Souza", "pedido": ["SanduÌche Natural", "Suco Detox"], "total": 28.00, "status": "em preparo" },
-  { "cliente": "Rodrigo Alves", "pedido": ["Strogonoff", "Coca-Cola"], "total": 58.00, "status": "entregue" },
-  { "cliente": "Marcos Silva", "pedido": ["Pizza Calabresa", "Suco de Uva"], "total": 48.00, "status": "em preparo" },
-  { "cliente": "Beatriz Ramos", "pedido": ["Risoto de Cogumelos", "¡gua com G·s"], "total": 65.00, "status": "finalizado" },
-  { "cliente": "Lucas Almeida", "pedido": ["Churrasco", "Cerveja Artesanal"], "total": 120.00, "status": "entregue" }
+  {
+    "id": 1,
+    "cliente": "Jo√£o Silva",
+    "pedido": [
+      "Pizza Margherita",
+      "Refrigerante"
+    ],
+    "total": 45.9,
+    "status": "finalizado"
+  },
+  {
+    "id": 2,
+    "cliente": "Maria Oliveira",
+    "pedido": [
+      "Lasanha",
+      "Suco de Laranja"
+    ],
+    "total": 38.5,
+    "status": "em preparo"
+  },
+  {
+    "id": 3,
+    "cliente": "Ana Souza",
+    "pedido": [
+      "Hamb√∫rguer",
+      "Batata Frita",
+      "Milkshake"
+    ],
+    "total": 55.0,
+    "status": "entregue"
+  },
+  {
+    "id": 4,
+    "cliente": "Pedro Lima",
+    "pedido": [
+      "Sushi",
+      "√Ågua"
+    ],
+    "total": 72.0,
+    "status": "finalizado"
+  },
+  {
+    "id": 5,
+    "cliente": "Clara Mendes",
+    "pedido": [
+      "Salada Caesar",
+      "Suco Verde"
+    ],
+    "total": 32.9,
+    "status": "em preparo"
+  },
+  {
+    "id": 6,
+    "cliente": "Rafael Gomes",
+    "pedido": [
+      "Feijoada",
+      "Cerveja"
+    ],
+    "total": 60.0,
+    "status": "entregue"
+  },
+  {
+    "id": 7,
+    "cliente": "Juliana Rocha",
+    "pedido": [
+      "Pizza Quatro Queijos",
+      "Refrigerante"
+    ],
+    "total": 49.5,
+    "status": "finalizado"
+  },
+  {
+    "id": 8,
+    "cliente": "Carlos Santos",
+    "pedido": [
+      "Macarronada",
+      "Vinho"
+    ],
+    "total": 85.0,
+    "status": "entregue"
+  },
+  {
+    "id": 9,
+    "cliente": "Fernanda Costa",
+    "pedido": [
+      "Tacos",
+      "Tequila"
+    ],
+    "total": 70.0,
+    "status": "em preparo"
+  },
+  {
+    "id": 10,
+    "cliente": "Andr√© Martins",
+    "pedido": [
+      "Camar√£o Grelhado",
+      "Suco de Abacaxi"
+    ],
+    "total": 95.0,
+    "status": "finalizado"
+  },
+  {
+    "id": 11,
+    "cliente": "Paula Souza",
+    "pedido": [
+      "Sandu√≠che Natural",
+      "Suco Detox"
+    ],
+    "total": 28.0,
+    "status": "em preparo"
+  },
+  {
+    "id": 12,
+    "cliente": "Rodrigo Alves",
+    "pedido": [
+      "Strogonoff",
+      "Coca-Cola"
+    ],
+    "total": 58.0,
+    "status": "entregue"
+  },
+  {
+    "id": 13,
+    "cliente": "Marcos Silva",
+    "pedido": [
+      "Pizza Calabresa",
+      "Suco de Uva"
+    ],
+    "total": 48.0,
+    "status": "em preparo"
+  },
+  {
+    "id": 14,
+    "cliente": "Beatriz Ramos",
+    "pedido": [
+      "Risoto de Cogumelos",
+      "√Ågua com G√°s"
+    ],
+    "total": 65.0,
+    "status": "finalizado"
+  },
+  {
+    "id": 15,
+    "cliente": "Lucas Almeida",
+    "pedido": [
+      "Churrasco",
+      "Cerveja Artesanal"
+    ],
+    "total": 120.0,
+    "status": "entregue"
+  }
 ]

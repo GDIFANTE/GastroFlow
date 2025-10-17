@@ -8,9 +8,10 @@
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "seed": "ts-node --transpile-only scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
     "mongodb": "^6.20.0",
     "next": "15.5.4",
     "react": "19.1.0",
@@ -25,6 +26,7 @@
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.14",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }
