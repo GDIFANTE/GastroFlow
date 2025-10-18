@@ -48,11 +48,11 @@ function shortNumericId(oid: ObjectId) {
 export default async function Home() {
   const db = await getdb();
 
-  // ✅ coleções corretas
+  // coleções corretas
   const pedidosCol = db.collection<PedidoDoc>("pedidos");
   const cardapioCol = db.collection<CardapioItem>("cardapio");
 
-  // -------- Pedidos recentes (10 últimos, apenas ativos) --------
+  //  Pedidos recentes (10 últimos, apenas ativos) 
   const recentOrders = await pedidosCol
     .find(
       { status: { $in: ["em preparo", "pronto"] } }, // apenas esses status
@@ -77,7 +77,7 @@ export default async function Home() {
         : ("Pronto" as const),
   }));
 
-  // -------- Cardápio (até 6 itens) --------
+  //  Cardápio (até 6 itens) 
   let menu: Array<{
     id: string;
     nome: string;
@@ -105,7 +105,7 @@ export default async function Home() {
     menu = [];
   }
 
-  // -------- Stats --------
+  //  Stats 
   const start = new Date();
   start.setHours(0, 0, 0, 0);
 
